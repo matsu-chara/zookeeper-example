@@ -2,15 +2,16 @@ package master;
 
 import base.PrintWatcher;
 import base.ZookeeperExecutor;
+import base.ZookeeperRoleBase;
 import org.apache.zookeeper.CreateMode;
 import org.apache.zookeeper.KeeperException;
 import org.apache.zookeeper.KeeperException.NoNodeException;
 import org.apache.zookeeper.ZooDefs;
 import org.apache.zookeeper.ZooKeeper;
 import org.apache.zookeeper.data.Stat;
-import base.ZookeeperRoleBase;
 
-class SyncMaster extends ZookeeperRoleBase implements Master {
+@Deprecated
+class SyncMaster extends ZookeeperRoleBase {
     boolean isLeader = false;
 
     public SyncMaster(ZooKeeper zk) {
@@ -33,7 +34,7 @@ class SyncMaster extends ZookeeperRoleBase implements Master {
         });
     }
 
-    @Override public void runForMaster() {
+    void runForMaster() {
         while (true) {
             try {
                 zk.create("/master", serverId.getBytes(), ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.EPHEMERAL);

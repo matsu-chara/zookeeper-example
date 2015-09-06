@@ -1,19 +1,20 @@
-package master;
+package master.watcer;
 
+import master.roles.MasterElector;
 import org.apache.zookeeper.WatchedEvent;
 import org.apache.zookeeper.Watcher;
 
 public class MasterExistsWatcher implements Watcher {
-    Master master;
+    MasterElector masterElector;
 
-    public MasterExistsWatcher(Master master) {
-        this.master = master;
+    public MasterExistsWatcher(MasterElector masterElector) {
+        this.masterElector = masterElector;
     }
 
     @Override public void process(WatchedEvent event) {
         if (event.getType() == Event.EventType.NodeDeleted) {
             assert "/master".equals(event.getPath());
-            master.runForMaster();
+            masterElector.runForMaster();
         }
     }
 }

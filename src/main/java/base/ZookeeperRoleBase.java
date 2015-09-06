@@ -11,8 +11,8 @@ public class ZookeeperRoleBase {
     protected final Logger    Log;
     protected final ZooKeeper zk;
 
-    public ZookeeperRoleBase(ZooKeeper zk) {
-        Log = LoggerFactory.getLogger(this.getClass());
+    public ZookeeperRoleBase(ZooKeeper zk, Class clazz) {
+        Log = LoggerFactory.getLogger(clazz);
         this.zk = zk;
     }
 
