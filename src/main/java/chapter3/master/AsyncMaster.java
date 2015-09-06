@@ -1,14 +1,14 @@
-package master;
+package chapter3.master;
 
-import base.ZookeeperRoleBase;
-import base.ZookeeperExecutor;
-import base.PrintWatcher;
+import chapter3.base.ZookeeperRoleBase;
+import chapter3.base.ZookeeperExecutor;
+import chapter3.base.PrintWatcher;
 import org.apache.zookeeper.CreateMode;
 import org.apache.zookeeper.KeeperException.Code;
 import org.apache.zookeeper.ZooDefs.Ids;
 import org.apache.zookeeper.ZooKeeper;
 
-public class AsyncMaster extends ZookeeperRoleBase {
+class AsyncMaster extends ZookeeperRoleBase {
     boolean isLeader = false;
 
     public AsyncMaster(ZooKeeper zk) {
@@ -27,7 +27,7 @@ public class AsyncMaster extends ZookeeperRoleBase {
     }
 
     void runForMaster() {
-        zk.create("/master",
+        zk.create("/chapter3/master",
                   serverId.getBytes(),
                   Ids.OPEN_ACL_UNSAFE,
                   CreateMode.EPHEMERAL,
@@ -49,7 +49,7 @@ public class AsyncMaster extends ZookeeperRoleBase {
     }
 
     void checkMaster() {
-        zk.getData("/master",
+        zk.getData("/chapter3/master",
                    false,
                    (resultCode, path, context, data, stat) -> {
                        switch (Code.get(resultCode)) {

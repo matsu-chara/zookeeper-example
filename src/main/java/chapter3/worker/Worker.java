@@ -1,13 +1,13 @@
-package worker;
+package chapter3.worker;
 
-import base.ZookeeperRoleBase;
-import base.ZookeeperExecutor;
-import base.PrintWatcher;
+import chapter3.base.ZookeeperRoleBase;
+import chapter3.base.ZookeeperExecutor;
+import chapter3.base.PrintWatcher;
 import org.apache.zookeeper.*;
 import org.apache.zookeeper.KeeperException.Code;
 import org.apache.zookeeper.ZooDefs.Ids;
 
-public class Worker extends ZookeeperRoleBase {
+class Worker extends ZookeeperRoleBase {
     private String status = "Idle";
 
     public Worker(ZooKeeper zk) {
@@ -26,7 +26,7 @@ public class Worker extends ZookeeperRoleBase {
     }
 
     void register() {
-        zk.create("/workers/worker-" + serverId,
+        zk.create("/workers/chapter3.worker-" + serverId,
                   "Idle".getBytes(),
                   Ids.OPEN_ACL_UNSAFE,
                   CreateMode.EPHEMERAL,
@@ -50,7 +50,7 @@ public class Worker extends ZookeeperRoleBase {
 
     synchronized void updateStatus(String status) {
         if (status.equals(this.status)) {
-            zk.setData("/workers/worker-" + serverId,
+            zk.setData("/workers/chapter3.worker-" + serverId,
                        status.getBytes(),
                        -1,
                        (AsyncCallback.StatCallback) (resultCode, path, context, stat) -> {

@@ -1,9 +1,11 @@
-import base.ZookeeperRoleBase;
-import base.PrintWatcher;
-import base.ZookeeperExecutor;
+package chapter3;
+
+import chapter3.base.ZookeeperRoleBase;
+import chapter3.base.PrintWatcher;
+import chapter3.base.ZookeeperExecutor;
 import org.apache.zookeeper.*;
 
-public class Bootstrap extends ZookeeperRoleBase {
+class Bootstrap extends ZookeeperRoleBase {
     public Bootstrap(ZooKeeper zk) {
         super(zk);
     }

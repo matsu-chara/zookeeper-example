@@ -1,8 +1,8 @@
-package client;
+package chapter3.client;
 
-import base.PrintWatcher;
-import base.ZookeeperExecutor;
-import base.ZookeeperRoleBase;
+import chapter3.base.PrintWatcher;
+import chapter3.base.ZookeeperExecutor;
+import chapter3.base.ZookeeperRoleBase;
 import org.apache.zookeeper.CreateMode;
 import org.apache.zookeeper.KeeperException;
 import org.apache.zookeeper.ZooKeeper;
@@ -11,7 +11,7 @@ import org.apache.zookeeper.KeeperException.*;
 
 import java.util.UUID;
 
-public class Client extends ZookeeperRoleBase {
+class Client extends ZookeeperRoleBase {
 
     public Client(ZooKeeper zk) {
         super(zk);

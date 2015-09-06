@@ -1,8 +1,8 @@
-package admin;
+package chapter3.admin;
 
-import base.PrintWatcher;
-import base.ZookeeperExecutor;
-import base.ZookeeperRoleBase;
+import chapter3.base.PrintWatcher;
+import chapter3.base.ZookeeperExecutor;
+import chapter3.base.ZookeeperRoleBase;
 import org.apache.zookeeper.KeeperException;
 import org.apache.zookeeper.ZooKeeper;
 import org.apache.zookeeper.data.Stat;
@@ -10,7 +10,7 @@ import org.apache.zookeeper.KeeperException.*;
 
 import java.util.Date;
 
-public class AdminClient extends ZookeeperRoleBase {
+class AdminClient extends ZookeeperRoleBase {
 
     public AdminClient(ZooKeeper zk) {
         super(zk);
@@ -18,7 +18,7 @@ public class AdminClient extends ZookeeperRoleBase {
 
     public static void main(String[] args) throws Exception {
         ZookeeperExecutor exec    = new ZookeeperExecutor();
-        PrintWatcher              watcher = new PrintWatcher();
+        PrintWatcher      watcher = new PrintWatcher();
 
         exec.withZk(watcher, zk -> {
             AdminClient ac = new AdminClient(zk);
@@ -38,8 +38,8 @@ public class AdminClient extends ZookeeperRoleBase {
 
     private void listMaster() throws KeeperException, InterruptedException {
         try {
-            Stat stat = new  Stat();
-            byte masterData[] = zk.getData("/master", false, stat);
+            Stat stat = new Stat();
+            byte masterData[] = zk.getData("/chapter3/master", false, stat);
             Date startDate = new Date(stat.getCtime());
             System.out.println("Master: " + new String(masterData) + " since " + startDate);
         } catch (NoNodeException e) {
@@ -49,7 +49,7 @@ public class AdminClient extends ZookeeperRoleBase {
 
     private void listWorkers() throws KeeperException, InterruptedException {
         System.out.println("Worker:");
-        for (String w: zk.getChildren("/workers", false)) {
+        for (String w : zk.getChildren("/workers", false)) {
             byte data[] = zk.getData("/workers/" + w, false, null);
             String state = new String(data);
             System.out.println("\t" + w + ": " + state);
@@ -58,7 +58,7 @@ public class AdminClient extends ZookeeperRoleBase {
 
     private void listTasks() throws KeeperException, InterruptedException {
         System.out.println("Tasks:");
-        for(String t: zk.getChildren("/tasks", false)) {
+        for (String t : zk.getChildren("/tasks", false)) {
             System.out.println("\t" + t);
         }
     }

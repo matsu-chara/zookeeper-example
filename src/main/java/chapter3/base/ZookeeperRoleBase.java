@@ -1,4 +1,4 @@
-package base;
+package chapter3.base;
 
 import org.apache.zookeeper.ZooKeeper;
 import org.slf4j.Logger;
