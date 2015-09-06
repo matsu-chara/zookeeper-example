@@ -22,7 +22,7 @@ public class AsyncMaster extends ZookeeperRoleBase {
         exec.withZk(watcher, zk -> {
             AsyncMaster am = new AsyncMaster(zk);
             am.runForMaster();
-            am.sleep(10);
+            am.sleep(60);
         });
     }
 

@@ -21,7 +21,7 @@ public class Worker extends ZookeeperRoleBase {
         exec.withZk(watcher, zk -> {
             Worker w = new Worker(zk);
             w.register();
-            w.sleep(6);
+            w.sleep(20);
         });
     }
 

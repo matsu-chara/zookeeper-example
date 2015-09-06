@@ -24,7 +24,6 @@ public class Client extends ZookeeperRoleBase {
         exec.withZk(watcher, zk -> {
             Client c = new Client(zk);
             c.queueCommand(UUID.randomUUID().toString());
-            c.sleep(6);
         });
 
     }
