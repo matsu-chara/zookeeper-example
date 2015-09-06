@@ -109,7 +109,7 @@ public class AsyncMaster implements Watcher {
     }
 
     public static void main(String args[]) throws Exception {
-        AsyncMaster am = new AsyncMaster(args[0]);
+        AsyncMaster am = new AsyncMaster(MyZooKeeperConst.hostPort);
         am.startZk();
 
         am.runForMaster();

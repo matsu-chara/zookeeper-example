@@ -56,14 +56,14 @@ public class Master implements Watcher {
     }
 
     public static void main(String args[]) throws Exception {
-        Master m = new Master(args[0]);
+        Master m = new Master(MyZooKeeperConst.hostPort);
         m.startZk();
 
         m.runForMaster();
 
         if(m.isLeader) {
             System.out.println("I'm the leader");
-            Thread.sleep(60000);
+            Thread.sleep(10 * 1000);
         } else {
             System.out.println("Someone else is the leader");
         }
