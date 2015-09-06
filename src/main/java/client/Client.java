@@ -1,8 +1,8 @@
-package chapter3.client;
+package client;
 
-import chapter3.base.PrintWatcher;
-import chapter3.base.ZookeeperExecutor;
-import chapter3.base.ZookeeperRoleBase;
+import base.PrintWatcher;
+import base.ZookeeperExecutor;
+import base.ZookeeperRoleBase;
 import org.apache.zookeeper.CreateMode;
 import org.apache.zookeeper.KeeperException;
 import org.apache.zookeeper.ZooKeeper;

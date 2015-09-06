@@ -1,4 +1,4 @@
-package chapter3.base;
+package base;
 
 import org.apache.zookeeper.WatchedEvent;
 import org.apache.zookeeper.Watcher;

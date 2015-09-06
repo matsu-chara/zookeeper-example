@@ -1,8 +1,8 @@
-package chapter3.admin;
+package admin;
 
-import chapter3.base.PrintWatcher;
-import chapter3.base.ZookeeperExecutor;
-import chapter3.base.ZookeeperRoleBase;
+import base.PrintWatcher;
+import base.ZookeeperExecutor;
+import base.ZookeeperRoleBase;
 import org.apache.zookeeper.KeeperException;
 import org.apache.zookeeper.ZooKeeper;
 import org.apache.zookeeper.data.Stat;
@@ -39,11 +39,11 @@ class AdminClient extends ZookeeperRoleBase {
     private void listMaster() throws KeeperException, InterruptedException {
         try {
             Stat stat = new Stat();
-            byte masterData[] = zk.getData("/chapter3/master", false, stat);
+            byte masterData[] = zk.getData("/master", false, stat);
             Date startDate = new Date(stat.getCtime());
             System.out.println("Master: " + new String(masterData) + " since " + startDate);
         } catch (NoNodeException e) {
-            System.out.println("No Master");
+            System.out.println("No SyncMaster");
         }
     }
 
