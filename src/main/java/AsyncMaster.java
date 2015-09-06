@@ -63,6 +63,9 @@ public class AsyncMaster implements Watcher {
                            case NONODE:
                                runForMaster();
                                break;
+                           case OK:
+                               isLeader = new String(data).equals(serverId);
+                               break;
                        }
                    },
                    null);
