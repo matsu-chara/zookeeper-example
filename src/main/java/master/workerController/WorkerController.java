@@ -1,18 +1,20 @@
-package master.roles;
+package master.workerController;
 
 import base.ChildrenCache;
-import base.ZookeeperRoleBase;
-import master.watcer.WorkersChangeWatcher;
 import org.apache.zookeeper.KeeperException;
 import org.apache.zookeeper.ZooKeeper;
+import org.slf4j.Logger;
 
 import java.util.List;
 
-public class WorkerController extends ZookeeperRoleBase {
+public class WorkerController {
+    ZooKeeper     zk;
+    Logger        Log;
     ChildrenCache workersCache;
 
-    public WorkerController(ZooKeeper zk, Class clazz) {
-        super(zk, clazz);
+    public WorkerController(ZooKeeper zk, Logger Log) {
+        this.zk = zk;
+        this.Log = Log;
     }
 
     public void getWorkers() {
@@ -28,7 +30,8 @@ public class WorkerController extends ZookeeperRoleBase {
                                    reassignAndSet(children);
                                    break;
                                default:
-                                   Log.error("getChildren failed", KeeperException.create(KeeperException.Code.get(resultCode), path));
+                                   Log.error("getChildren failed",
+                                             KeeperException.create(KeeperException.Code.get(resultCode), path));
                            }
                        },
                        null);

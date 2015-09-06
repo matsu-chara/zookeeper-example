@@ -1,18 +1,22 @@
-package master.roles;
+package master.masterElector;
 
-import base.ZookeeperRoleBase;
 import master.MasterStates;
-import master.watcer.MasterExistsWatcher;
 import org.apache.zookeeper.CreateMode;
 import org.apache.zookeeper.KeeperException;
 import org.apache.zookeeper.ZooDefs;
 import org.apache.zookeeper.ZooKeeper;
+import org.slf4j.Logger;
 
-public class MasterElector extends ZookeeperRoleBase {
+public class MasterElector {
     MasterStates state = MasterStates.NOTELECTED;
+    ZooKeeper zk;
+    Logger    Log;
+    String    serverId;
 
-    public MasterElector(ZooKeeper zk, Class clazz) {
-        super(zk, clazz);
+    public MasterElector(ZooKeeper zk, Logger log, String serverId) {
+        this.zk = zk;
+        Log = log;
+        this.serverId = serverId;
     }
 
     public void runForMaster() {
@@ -35,7 +39,8 @@ public class MasterElector extends ZookeeperRoleBase {
                               break;
                           default:
                               state = MasterStates.NOTELECTED;
-                              Log.error("Something went wrong when running for masterRunner.", KeeperException.create(KeeperException.Code.get(resultCode), path));
+                              Log.error("Something went wrong when running for masterRunner.",
+                                        KeeperException.create(KeeperException.Code.get(resultCode), path));
                       }
                   },
                   null);

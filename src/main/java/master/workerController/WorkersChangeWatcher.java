@@ -1,6 +1,5 @@
-package master.watcer;
+package master.workerController;
 
-import master.roles.WorkerController;
 import org.apache.zookeeper.WatchedEvent;
 import org.apache.zookeeper.Watcher;
 

@@ -1,6 +1,5 @@
-package master.watcer;
+package master.masterElector;
 
-import master.roles.MasterElector;
 import org.apache.zookeeper.WatchedEvent;
 import org.apache.zookeeper.Watcher;
 
