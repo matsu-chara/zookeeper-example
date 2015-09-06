@@ -1,14 +1,24 @@
 package worker;
 
-import base.ZookeeperRoleBase;
-import base.ZookeeperExecutor;
 import base.PrintWatcher;
-import org.apache.zookeeper.*;
+import base.ZookeeperExecutor;
+import base.ZookeeperRoleBase;
+import org.apache.zookeeper.AsyncCallback;
+import org.apache.zookeeper.CreateMode;
+import org.apache.zookeeper.KeeperException;
 import org.apache.zookeeper.KeeperException.Code;
 import org.apache.zookeeper.ZooDefs.Ids;
+import org.apache.zookeeper.ZooKeeper;
+
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
+import java.util.concurrent.LinkedBlockingQueue;
 
 class Worker extends ZookeeperRoleBase {
-    private String status = "Idle";
+    private       String                status       = "Idle";
+    private       Executor              executor     = Executors.newFixedThreadPool(3);
+    private final BlockingQueue<String> onGoingTasks = new LinkedBlockingQueue<>();
 
     public Worker(ZooKeeper zk) {
         super(zk);
@@ -16,7 +26,7 @@ class Worker extends ZookeeperRoleBase {
 
     public static void main(String[] args) throws Exception {
         ZookeeperExecutor exec    = new ZookeeperExecutor();
-        PrintWatcher watcher = new PrintWatcher();
+        PrintWatcher      watcher = new PrintWatcher();
 
         exec.withZk(watcher, zk -> {
             Worker w = new Worker(zk);
@@ -27,7 +37,7 @@ class Worker extends ZookeeperRoleBase {
 
     void register() {
         zk.create("/workers/worker-" + serverId,
-                  "Idle".getBytes(),
+                  new byte[0],
                   Ids.OPEN_ACL_UNSAFE,
                   CreateMode.EPHEMERAL,
                   (resultCode, path, context, name) -> {
@@ -42,7 +52,7 @@ class Worker extends ZookeeperRoleBase {
                               Log.warn("Already registered: " + serverId);
                               break;
                           default:
-                              Log.error("Something went wrong: " + KeeperException.create(Code.get(resultCode), path));
+                              Log.error("Something went wrong: ", KeeperException.create(Code.get(resultCode), path));
                       }
                   }
                 , null);
@@ -68,4 +78,40 @@ class Worker extends ZookeeperRoleBase {
         updateStatus(status);
     }
 
+    public void getTasks() {
+        zk.getChildren("/assign/worker-" + serverId,
+                       new TaskWatcher(this, serverId),
+                       (resultCode, path, context, children) -> {
+                           switch (Code.get(resultCode)) {
+                               case CONNECTIONLOSS:
+                                   getTasks();
+                                   break;
+                               case OK:
+                                   if (children != null) {
+                                       executor.execute(() -> {
+                                           Log.info("Looping into tasks");
+                                           synchronized (onGoingTasks) {
+                                               for (String task : children) {
+                                                   if (!onGoingTasks.contains(task)) {
+                                                       Log.trace("New task: " + task);
+                                                       zk.getData("/assign/worker-" + serverId + "/" + task,
+                                                                  false,
+                                                                  (resultCode2, path2, context2, data, stat) -> {
+                                                                      onGoingTasks.add(task);
+                                                                      // TODO: process task
+                                                                  },
+                                                                  task);
+                                                   }
+                                               }
+                                           }
+                                       });
+                                   }
+                                   break;
+                               default:
+                                   Log.error("getChildren failed: ",
+                                             KeeperException.create(Code.get(resultCode), path));
+                           }
+                       },
+                       null);
+    }
 }

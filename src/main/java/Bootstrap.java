@@ -43,7 +43,8 @@ class Bootstrap extends ZookeeperRoleBase {
                               Log.warn("Parent already registered: " + path1);
                               break;
                           default:
-                              Log.error("Something went wrong: ", KeeperException.create(KeeperException.Code.get(resultCode), path1));
+                              Log.error("Something went wrong: ",
+                                        KeeperException.create(KeeperException.Code.get(resultCode), path1));
                       }
                   },
                   data);
