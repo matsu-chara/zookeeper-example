@@ -35,21 +35,19 @@ public class AsyncMaster implements Watcher {
                   serverId.getBytes(),
                   Ids.OPEN_ACL_UNSAFE,
                   CreateMode.EPHEMERAL,
-                  new StringCallback() {
-                      @Override public void processResult(int rc, String path, Object ctx, String name) {
-                          switch (Code.get(rc)) {
-                              case CONNECTIONLOSS:
-                                  checkMaster();
-                                  return;
-                              case OK:
-                                  isLeader = true;
-                                  break;
-                              default:
-                                  isLeader = false;
-                                  break;
-                          }
-                          System.out.println("I'm " + (isLeader ? "" : "*not* ") + "the leader");
+                  (resultCode, path, context, name) -> {
+                      switch (Code.get(resultCode)) {
+                          case CONNECTIONLOSS:
+                              checkMaster();
+                              return;
+                          case OK:
+                              isLeader = true;
+                              break;
+                          default:
+                              isLeader = false;
+                              break;
                       }
+                      System.out.println("I'm " + (isLeader ? "" : "*not* ") + "the leader");
                   },
                   null);
     }
@@ -57,16 +55,14 @@ public class AsyncMaster implements Watcher {
     void checkMaster() {
         zk.getData("/master",
                    false,
-                   new DataCallback() {
-                       @Override public void processResult(int rc, String path, Object ctx, byte[] data, Stat stat) {
-                           switch (Code.get(rc)) {
-                               case CONNECTIONLOSS:
-                                   checkMaster();
-                                   break;
-                               case NONODE:
-                                   runForMaster();
-                                   break;
-                           }
+                   (resultCode, path, context, data, stat) -> {
+                       switch (Code.get(resultCode)) {
+                           case CONNECTIONLOSS:
+                               checkMaster();
+                               break;
+                           case NONODE:
+                               runForMaster();
+                               break;
                        }
                    },
                    null);
@@ -111,6 +107,7 @@ public class AsyncMaster implements Watcher {
     public static void main(String args[]) throws Exception {
         AsyncMaster am = new AsyncMaster(MyZooKeeperConst.hostPort);
         am.startZk();
+        am.bootstrap();
 
         am.runForMaster();
         Thread.sleep(10 * 1000);
