@@ -20,10 +20,13 @@ public class Master implements Watcher {
         System.out.println(event);
     }
 
+    void stopZK() throws Exception { zk.close(); }
+
     public static void main(String args[]) throws Exception {
         Master m = new Master(args[0]);
         m.startZk();
 
         Thread.sleep(60000);
+        m.stopZK();
     }
 }
