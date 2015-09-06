@@ -1,18 +1,19 @@
 package base;
 
-import org.apache.zookeeper.WatchedEvent;
-import org.apache.zookeeper.Watcher;
+import org.apache.zookeeper.ZooKeeper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Random;
 
-public class ZookeeperBase implements Watcher {
+public class ZookeeperRoleBase {
     protected final String serverId = Integer.toHexString((new Random()).nextInt());
-    protected final Logger Log;
+    protected final Logger    Log;
+    protected final ZooKeeper zk;
 
-    public ZookeeperBase() {
+    public ZookeeperRoleBase(ZooKeeper zk) {
         Log = LoggerFactory.getLogger(this.getClass());
+        this.zk = zk;
     }
 
     // InterruptedExceptionが検査例外であるため、lambdaの中で直接Thread.sleepを使うことができない。
@@ -24,9 +25,4 @@ public class ZookeeperBase implements Watcher {
             throw new RuntimeException(e);
         }
     }
-
-    @Override public void process(WatchedEvent event) {
-        System.out.println(event.toString());
-    }
 }
-

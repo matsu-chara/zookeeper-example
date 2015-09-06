@@ -1,26 +1,32 @@
 package master;
 
-import base.ZookeeperBase;
+import base.ZookeeperRoleBase;
 import base.ZookeeperExecutor;
+import base.PrintWatcher;
 import org.apache.zookeeper.CreateMode;
 import org.apache.zookeeper.KeeperException.Code;
 import org.apache.zookeeper.ZooDefs.Ids;
 import org.apache.zookeeper.ZooKeeper;
 
-public class AsyncMaster extends ZookeeperBase {
+public class AsyncMaster extends ZookeeperRoleBase {
     boolean isLeader = false;
 
-    public static void main(String args[]) throws Exception {
-        ZookeeperExecutor exec = new ZookeeperExecutor();
-        AsyncMaster       am   = new AsyncMaster();
+    public AsyncMaster(ZooKeeper zk) {
+        super(zk);
+    }
 
-        exec.withZk(am, zk -> {
-            am.runForMaster(zk);
+    public static void main(String args[]) throws Exception {
+        ZookeeperExecutor       exec    = new ZookeeperExecutor();
+        PrintWatcher watcher = new PrintWatcher();
+
+        exec.withZk(watcher, zk -> {
+            AsyncMaster am = new AsyncMaster(zk);
+            am.runForMaster();
             am.sleep(10);
         });
     }
 
-    void runForMaster(ZooKeeper zk) {
+    void runForMaster() {
         zk.create("/master",
                   serverId.getBytes(),
                   Ids.OPEN_ACL_UNSAFE,
@@ -28,7 +34,7 @@ public class AsyncMaster extends ZookeeperBase {
                   (resultCode, path, context, name) -> {
                       switch (Code.get(resultCode)) {
                           case CONNECTIONLOSS:
-                              checkMaster(zk);
+                              checkMaster();
                               return;
                           case OK:
                               isLeader = true;
@@ -37,21 +43,21 @@ public class AsyncMaster extends ZookeeperBase {
                               isLeader = false;
                               break;
                       }
-                      System.out.println("I'm " + (isLeader ? "" : "*not* ") + "the leader");
+                      Log.info("I'm " + (isLeader ? "" : "*not* ") + "the leader");
                   },
                   null);
     }
 
-    void checkMaster(ZooKeeper zk) {
+    void checkMaster() {
         zk.getData("/master",
                    false,
                    (resultCode, path, context, data, stat) -> {
                        switch (Code.get(resultCode)) {
                            case CONNECTIONLOSS:
-                               checkMaster(zk);
+                               checkMaster();
                                break;
                            case NONODE:
-                               runForMaster(zk);
+                               runForMaster();
                                break;
                            case OK:
                                isLeader = new String(data).equals(serverId);

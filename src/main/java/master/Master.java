@@ -1,5 +1,6 @@
 package master;
 
+import base.PrintWatcher;
 import base.ZookeeperExecutor;
 import org.apache.zookeeper.CreateMode;
 import org.apache.zookeeper.KeeperException;
@@ -7,17 +8,22 @@ import org.apache.zookeeper.KeeperException.NoNodeException;
 import org.apache.zookeeper.ZooDefs;
 import org.apache.zookeeper.ZooKeeper;
 import org.apache.zookeeper.data.Stat;
-import base.ZookeeperBase;
+import base.ZookeeperRoleBase;
 
-public class Master extends ZookeeperBase {
+public class Master extends ZookeeperRoleBase {
     boolean isLeader = false;
 
-    public static void main(String args[]) throws Exception {
-        ZookeeperExecutor exec = new ZookeeperExecutor();
-        Master            m    = new Master();
+    public Master(ZooKeeper zk) {
+        super(zk);
+    }
 
-        exec.withZk(m, zk -> {
-            m.runForMaster(zk);
+    public static void main(String args[]) throws Exception {
+        ZookeeperExecutor       exec    = new ZookeeperExecutor();
+        PrintWatcher watcher = new PrintWatcher();
+
+        exec.withZk(watcher, zk -> {
+            Master m = new Master(zk);
+            m.runForMaster();
             if (m.isLeader) {
                 System.out.println("I'm the leader");
                 m.sleep(10);
@@ -27,7 +33,7 @@ public class Master extends ZookeeperBase {
         });
     }
 
-    void runForMaster(ZooKeeper zk) {
+    void runForMaster() {
         while (true) {
             try {
                 zk.create("/master", serverId.getBytes(), ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.EPHEMERAL);
@@ -42,11 +48,11 @@ public class Master extends ZookeeperBase {
                 throw new RuntimeException(e);
             }
 
-            if (checkMaster(zk)) break;
+            if (checkMaster()) break;
         }
     }
 
-    boolean checkMaster(ZooKeeper zk) {
+    boolean checkMaster() {
         while (true) {
             try {
                 Stat stat = new Stat();

@@ -1,25 +1,31 @@
 package worker;
 
-import base.ZookeeperBase;
+import base.ZookeeperRoleBase;
 import base.ZookeeperExecutor;
-import org.apache.zookeeper.CreateMode;
-import org.apache.zookeeper.KeeperException;
+import base.PrintWatcher;
+import org.apache.zookeeper.*;
 import org.apache.zookeeper.KeeperException.Code;
 import org.apache.zookeeper.ZooDefs.Ids;
-import org.apache.zookeeper.ZooKeeper;
 
-public class Worker extends ZookeeperBase {
+public class Worker extends ZookeeperRoleBase {
+    private String status = "Idle";
+
+    public Worker(ZooKeeper zk) {
+        super(zk);
+    }
+
     public static void main(String[] args) throws Exception {
-        ZookeeperExecutor exec = new ZookeeperExecutor();
-        Worker w = new Worker();
+        ZookeeperExecutor exec    = new ZookeeperExecutor();
+        PrintWatcher watcher = new PrintWatcher();
 
-        exec.withZk(w, zk -> {
-            w.register(zk);
+        exec.withZk(watcher, zk -> {
+            Worker w = new Worker(zk);
+            w.register();
             w.sleep(6);
         });
     }
 
-    void register(ZooKeeper zk) {
+    void register() {
         zk.create("/workers/worker-" + serverId,
                   "Idle".getBytes(),
                   Ids.OPEN_ACL_UNSAFE,
@@ -27,7 +33,7 @@ public class Worker extends ZookeeperBase {
                   (resultCode, path, context, name) -> {
                       switch (Code.get(resultCode)) {
                           case CONNECTIONLOSS:
-                              register(zk);
+                              register();
                               break;
                           case OK:
                               Log.info("Resistered successfully: " + serverId);
@@ -41,4 +47,25 @@ public class Worker extends ZookeeperBase {
                   }
                 , null);
     }
+
+    synchronized void updateStatus(String status) {
+        if (status.equals(this.status)) {
+            zk.setData("/workers/worker-" + serverId,
+                       status.getBytes(),
+                       -1,
+                       (AsyncCallback.StatCallback) (resultCode, path, context, stat) -> {
+                           switch (Code.get(resultCode)) {
+                               case CONNECTIONLOSS:
+                                   updateStatus((String) context);
+                           }
+                       },
+                       status);
+        }
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+        updateStatus(status);
+    }
+
 }

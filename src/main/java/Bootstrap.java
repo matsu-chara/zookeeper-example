@@ -1,45 +1,49 @@
-import base.ZookeeperBase;
+import base.ZookeeperRoleBase;
+import base.PrintWatcher;
 import base.ZookeeperExecutor;
 import org.apache.zookeeper.*;
 
-public class Bootstrap extends ZookeeperBase {
-    public static void main(String args[]) throws Exception {
-        ZookeeperExecutor exec = new ZookeeperExecutor();
-        Bootstrap b = new Bootstrap();
+public class Bootstrap extends ZookeeperRoleBase {
+    public Bootstrap(ZooKeeper zk) {
+        super(zk);
+    }
 
-        exec.withZk(b, zk -> {
-            b.bootstrap(zk);
+    public static void main(String args[]) throws Exception {
+        ZookeeperExecutor exec    = new ZookeeperExecutor();
+        PrintWatcher      watcher = new PrintWatcher();
+
+        exec.withZk(watcher, zk -> {
+            Bootstrap b = new Bootstrap(zk);
+            b.bootstrap();
             b.sleep(3);
         });
     }
 
-    void bootstrap(ZooKeeper zk) {
-        createParent(zk, "/workers", new byte[0]);
-        createParent(zk, "/assign", new byte[0]);
-        createParent(zk, "/tasks", new byte[0]);
-        createParent(zk, "/status", new byte[0]);
+    void bootstrap() {
+        createParent("/workers", new byte[0]);
+        createParent("/assign", new byte[0]);
+        createParent("/tasks", new byte[0]);
+        createParent("/status", new byte[0]);
     }
 
-    void createParent(ZooKeeper zk, String path, byte[] data) {
+    void createParent(String path, byte[] data) {
         zk.create(path,
                   data,
                   ZooDefs.Ids.OPEN_ACL_UNSAFE,
                   CreateMode.PERSISTENT,
-                  new AsyncCallback.StringCallback() {
-                      @Override public void processResult(int rc, String path, Object ctx, String name) {
-                          switch (KeeperException.Code.get(rc)) {
-                              case CONNECTIONLOSS:
-                                  createParent(zk, path, (byte[]) ctx);
-                                  break;
-                              case OK:
-                                  Log.info("Parent created");
-                                  break;
-                              case NODEEXISTS:
-                                  Log.warn("Parent already registered: " + path);
-                                  break;
-                              default:
-                                  Log.error("Something went wrong: ", KeeperException.create(KeeperException.Code.get(rc), path));
-                          }
+                  (resultCode, path1, context, name) -> {
+                      switch (KeeperException.Code.get(resultCode)) {
+                          case CONNECTIONLOSS:
+                              createParent(path1, (byte[]) context);
+                              break;
+                          case OK:
+                              Log.info("Parent created");
+                              break;
+                          case NODEEXISTS:
+                              Log.warn("Parent already registered: " + path1);
+                              break;
+                          default:
+                              Log.error("Something went wrong: ", KeeperException.create(KeeperException.Code.get(resultCode), path1));
                       }
                   },
                   data);
